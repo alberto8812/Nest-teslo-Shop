@@ -1,11 +1,11 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { ProudctsService } from './proudcts.service';
-import { CreateProudctDto } from './dto/create-proudct.dto';
-import { UpdateProudctDto } from './dto/update-proudct.dto';
+import { ProductsService } from './products.service';
+import { CreateProudctDto } from './dto/create-product.dto';
+import { UpdateProudctDto } from './dto/update-product.dto';
 
-@Controller('proudcts')
-export class ProudctsController {
-  constructor(private readonly proudctsService: ProudctsService) {}
+@Controller('products')
+export class ProductsController {
+  constructor(private readonly proudctsService: ProductsService) {}
 
   @Post()
   create(@Body() createProudctDto: CreateProudctDto) {
