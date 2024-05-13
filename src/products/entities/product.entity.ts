@@ -42,7 +42,7 @@ export class Product extends Document {
 
  const productSchema = SchemaFactory.createForClass(Product);
 
- productSchema.pre('save', async function(next) {
+ productSchema.pre(['save',], async function(next) {
   if(!this.slug){
     this.slug=this.title
     .toLowerCase()
@@ -58,5 +58,33 @@ export class Product extends Document {
 
   next()
 })
+productSchema.pre('updateOne', async function(next) {
+  const update = this.getUpdate(); // Get the update
+
+  // If title is being updated and slug is not provided in update
+  if (update['$set'] && update['$set'].title && !update['$set'].slug) {
+    let newSlug:string;
+    const title = update['$set'].title as string;
+    const slug = update['$set'].slug as string;
+    if(title){
+
+     newSlug = title
+        .toLowerCase()
+        .replace(/ /g, '_')
+        .replace(/'/g, '');
+    }else{
+      
+     newSlug = slug
+     .toLowerCase()
+     .replace(/ /g, '_')
+     .replace(/'/g, '');
+    }
+
+    // Update slug in the update object
+    update['$set'].slug = slug;
+  }
+
+  next();
+});
 
 export const ProductSchema = productSchema;
