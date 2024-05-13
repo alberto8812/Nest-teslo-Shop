@@ -16,7 +16,7 @@ export class CreateProudctDto {
   @IsNumber()
   @IsPositive()
   @IsOptional()
-  prive?: number;
+  price?: number;
 
   @IsString()
   @IsOptional()

@@ -35,6 +35,28 @@ export class Product extends Document {
 
   //tags
   //imagens
+
+  
 }
 
-export const ProductSchema = SchemaFactory.createForClass(Product);
+
+ const productSchema = SchemaFactory.createForClass(Product);
+
+ productSchema.pre('save', async function(next) {
+  if(!this.slug){
+    this.slug=this.title
+    .toLowerCase()
+    .replaceAll(' ','_')
+    .replaceAll("'",'')
+  }else{
+
+    this.slug=this.slug
+    .toLowerCase()
+    .replaceAll(' ','_')
+    .replaceAll("'",'')
+  }
+
+  next()
+})
+
+export const ProductSchema = productSchema;
