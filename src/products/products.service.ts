@@ -1,9 +1,11 @@
-import { BadRequestException, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { CreateProudctDto } from './dto/create-product.dto';
 import { UpdateProudctDto } from './dto/update-product.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Product } from './entities/product.entity';
-import { Model } from 'mongoose';
+import { Model, isValidObjectId } from 'mongoose';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
+
 
 @Injectable()
 export class ProductsService {
@@ -22,19 +24,41 @@ export class ProductsService {
      this.handleDBEceptions(error);
   }
   }
-  findAll() {
-    return `This action returns all proudcts`;
+  findAll(paginationDto:PaginationDto) {
+    const {limit=20,page=1}=paginationDto;
+    const products= this.ProductModel.find()
+    .skip((page-1)*limit)
+    .limit(limit)
+
+    return products;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} proudct`;
+  async findOne(id: string) {
+    try {
+      if(isValidObjectId(id)){
+         return this.ProductModel.findById({_id:id});
+      }else{
+
+        return this.ProductModel.findById({_id:id});
+      }
+      
+    } catch (error) {
+      this.handleDBEceptions(error);
+    }
   }
 
-  update(id: number, updateProudctDto: UpdateProudctDto) {
+  async update(id: number, updateProudctDto: UpdateProudctDto) {
     return `This action updates a #${id} proudct`;
   }
 
-  remove(id: number) {
+  async remove(id: string) {
+    const product=await this.findOne(id);
+
+    console.log(product)
+    if(!product){
+      throw new NotFoundException(`product don' exist en db`)
+    }
+    await this.ProductModel.deleteOne({_id:product._id})
     return `This action removes a #${id} proudct`;
   }
 

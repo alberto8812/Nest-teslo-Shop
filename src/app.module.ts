@@ -4,6 +4,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { EnvConfiguration } from './config/env.config';
 import { JoiValidationSchema } from './config/joi.validation';
 import { ProductsModule } from './products/products.module';
+import { CommonModule } from './common/common.module';
 
 
 
@@ -14,7 +15,8 @@ import { ProductsModule } from './products/products.module';
       validationSchema:JoiValidationSchema
     }),
     MongooseModule.forRoot(process.env.MONGO_DB),
-    ProductsModule
+    ProductsModule,
+    CommonModule
   ],
 })
 export class AppModule {}

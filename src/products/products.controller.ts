@@ -1,7 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProudctDto } from './dto/create-product.dto';
 import { UpdateProudctDto } from './dto/update-product.dto';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
+
 
 @Controller('products')
 export class ProductsController {
@@ -13,13 +15,13 @@ export class ProductsController {
   }
 
   @Get()
-  findAll() {
-    return this.proudctsService.findAll();
+  findAll(@Query() paginationDto:PaginationDto) {
+    return this.proudctsService.findAll(paginationDto);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.proudctsService.findOne(+id);
+    return this.proudctsService.findOne(id);
   }
 
   @Patch(':id')
@@ -29,6 +31,6 @@ export class ProductsController {
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.proudctsService.remove(+id);
+    return this.proudctsService.remove(id);
   }
 }
