@@ -3,6 +3,7 @@ import { ProductsService } from './products.service';
 import { CreateProudctDto } from './dto/create-product.dto';
 import { UpdateProudctDto } from './dto/update-product.dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { MongoIdPipe } from 'src/common/pipe/mongoId.pipe';
 
 
 @Controller('products')
@@ -19,14 +20,14 @@ export class ProductsController {
     return this.proudctsService.findAll(paginationDto);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.proudctsService.findOne(id);
+  @Get(':term')
+  findOne(@Param('term') term: string) {
+    return this.proudctsService.findOne(term);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProudctDto: UpdateProudctDto) {
-    return this.proudctsService.update(+id, updateProudctDto);
+  update(@Param('id',MongoIdPipe)  id: string, @Body() updateProudctDto: UpdateProudctDto) {
+    return this.proudctsService.update(id, updateProudctDto);
   }
 
   @Delete(':id')
