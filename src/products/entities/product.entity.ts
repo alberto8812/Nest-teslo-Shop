@@ -34,6 +34,8 @@ export class Product extends Document {
   gender:string
 
   //tags
+  @Prop()
+  tags:string[]
   //imagens
 
   
@@ -60,28 +62,33 @@ export class Product extends Document {
 })
 productSchema.pre('updateOne', async function(next) {
   const update = this.getUpdate(); // Get the update
-
+//todo investigar por que no funcionan
   // If title is being updated and slug is not provided in update
-  if (update['$set'] && update['$set'].title && !update['$set'].slug) {
+  if (update['$set'] && update['$set'].title ) {
     let newSlug:string;
-    const title = update['$set'].title as string;
-    const slug = update['$set'].slug as string;
-    if(title){
+    const title = update['$get'].title as string;
 
      newSlug = title
         .toLowerCase()
         .replace(/ /g, '_')
         .replace(/'/g, '');
-    }else{
-      
+
+
+    // Update slug in the update object
+    update['$set'].slug = newSlug;
+  }
+  if (update['$set'] && update['$set'].slug) {
+    let newSlug:string;
+    const slug = update['$set'].slug as string;
+  
      newSlug = slug
      .toLowerCase()
      .replace(/ /g, '_')
      .replace(/'/g, '');
-    }
+    
 
     // Update slug in the update object
-    update['$set'].slug = slug;
+    update['$set'].slug = newSlug;
   }
 
   next();

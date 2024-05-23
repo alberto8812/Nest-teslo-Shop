@@ -45,7 +45,6 @@ export class ProductsService {
       } else {
         product = await this.ProductModel.findOne({ slug: term });
       }
-      console.log(term)
       if (!product) {
         throw new BadRequestException(`product don' exist en db ${term}`);
       }
