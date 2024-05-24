@@ -2,7 +2,9 @@ import { Module } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { ProductsController } from './products.controller';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ProductSchema, Product } from './entities/product.entity';
+
+import { Product, ProductIamge, ProductSchema, producImageSchema } from './entities';
+
 
 @Module({
   controllers: [ProductsController],
@@ -12,6 +14,10 @@ import { ProductSchema, Product } from './entities/product.entity';
       {
         name:Product.name,
         schema:ProductSchema
+      },
+      {
+        name:ProductIamge.name,
+        schema:producImageSchema
       }
     ])
   ]

@@ -11,6 +11,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Product } from './entities/product.entity';
 import { Model, isValidObjectId } from 'mongoose';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { ProductIamge } from './entities/product-image.entity';
 
 @Injectable()
 export class ProductsService {
@@ -18,13 +19,29 @@ export class ProductsService {
   constructor(
     @InjectModel(Product.name)
     private readonly ProductModel: Model<Product>,
+    @InjectModel(ProductIamge.name)
+    private readonly productIamge: Model<ProductIamge>,
   ) {}
 
   async create(createProudctDto: CreateProudctDto) {
     try {
-      const product = await this.ProductModel.create(createProudctDto);
+      const {images=[],...newcreateProudctDto}=createProudctDto;
+
+   
+      const product = await this.ProductModel.create(
+        {...newcreateProudctDto,
+        });
+        const imagesPromises= images.map(url=> this.productIamge.create({url:url,product:product._id}))
+       const imagenesServer = await Promise.all(imagesPromises);
+
+       const imagenes = [];
+       imagenesServer.map(imgurl=>product.images.push(imgurl._id))
+       product.save()
+
+
       return product;
     } catch (error) {
+      console.log(error)
       this.handleDBEceptions(error);
     }
   }
@@ -59,7 +76,7 @@ export class ProductsService {
   async update(id: string, updateProudctDto: UpdateProudctDto) {
      const product= await this.findOne(id);
      const transformProduc=await product.toJSON()
-      await product.updateOne({...transformProduc,...updateProudctDto},{new:true});
+      await product.updateOne({...transformProduc,...updateProudctDto,images:[]},{new:true});
       await product.save()
     return await this.findOne(id);
   }

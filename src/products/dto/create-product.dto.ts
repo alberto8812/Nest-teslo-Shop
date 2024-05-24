@@ -42,4 +42,7 @@ export class CreateProudctDto {
   @IsString({each:true})
   @IsOptional()
   tags:string[]
+
+  @IsArray()
+  images?:string[]
 }
