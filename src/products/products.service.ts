@@ -47,7 +47,7 @@ export class ProductsService {
   }
   findAll(paginationDto: PaginationDto) {
     const { limit = 20, page = 1 } = paginationDto;
-    const products = this.ProductModel.find()
+    const products = this.ProductModel.find().populate('images')
       .skip((page - 1) * limit)
       .limit(limit);
 
@@ -58,9 +58,9 @@ export class ProductsService {
     let product: Product;
     try {
       if (isValidObjectId(term)) {
-        product = await this.ProductModel.findById({ _id: term });
+        product = await this.ProductModel.findById({ _id: term }).populate('images');
       } else {
-        product = await this.ProductModel.findOne({ slug: term });
+        product = await this.ProductModel.findOne({ slug: term }).populate('images');
       }
       if (!product) {
         throw new BadRequestException(`product don' exist en db ${term}`);
