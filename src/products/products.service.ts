@@ -25,46 +25,19 @@ export class ProductsService {
 
   async create(createProudctDto: CreateProudctDto) {
     try {
-      const {images=[],...newcreateProudctDto}=createProudctDto;
+      const { images = [], ...newcreateProudctDto } = createProudctDto;
 
-   
-      const product = await this.ProductModel.create(
-        {...newcreateProudctDto,
-        });
-        const imagesPromises= images.map(url=> this.productIamge.create({url:url,product:product._id}))
-       const imagenesServer = await Promise.all(imagesPromises);
+      const product = await this.ProductModel.create({
+        ...newcreateProudctDto,
+      });
+      const imagesPromises = images.map((url) =>
+        this.productIamge.create({ url: url, product: product._id }),
+      );
+      const imagenesServer = await Promise.all(imagesPromises);
 
-       const imagenes = [];
-       imagenesServer.map(imgurl=>product.images.push(imgurl._id))
-       product.save()
-
-
-      return product;
-    } catch (error) {
-      console.log(error)
-      this.handleDBEceptions(error);
-    }
-  }
-  findAll(paginationDto: PaginationDto) {
-    const { limit = 20, page = 1 } = paginationDto;
-    const products = this.ProductModel.find().populate('images')
-      .skip((page - 1) * limit)
-      .limit(limit);
-
-    return products;
-  }
-
-  async findOne(term: string) {
-    let product: Product;
-    try {
-      if (isValidObjectId(term)) {
-        product = await this.ProductModel.findById({ _id: term }).populate('images');
-      } else {
-        product = await this.ProductModel.findOne({ slug: term }).populate('images');
-      }
-      if (!product) {
-        throw new BadRequestException(`product don' exist en db ${term}`);
-      }
+      const imagenes = [];
+      imagenesServer.map((imgurl) => product.images.push(imgurl._id));
+      product.save();
 
       return product;
     } catch (error) {
@@ -72,13 +45,85 @@ export class ProductsService {
       this.handleDBEceptions(error);
     }
   }
+  async findAll(paginationDto: PaginationDto) {
+    const { limit = 20, page = 1 } = paginationDto;
+    const products = await this.ProductModel.find()
+      .populate({ path: 'images', select: ['url'] })
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    return products.map((producto) => {
+      const { images, ...newProducts } = producto.toObject();
+      const newsImages = images.map((item: any) => item.url);
+      return {
+        ...newProducts, // Convertir el documento de Mongoose a un objeto JavaScript simple
+        images: newsImages,
+      };
+    });
+  }
+
+  async findOne(term: string) {
+    let product: Product;
+    try {
+      if (isValidObjectId(term)) {
+        product = await this.ProductModel.findById({ _id: term }).populate({
+          path: 'images',
+          select: ['url'],
+        });
+      } else {
+        product = await this.ProductModel.findOne({ slug: term }).populate({
+          path: 'images',
+          select: ['url'],
+        });
+      }
+      if (!product) {
+        throw new BadRequestException(`product don' exist en db ${term}`);
+      }
+
+      const { images, ...newProducts } = product.toObject();
+      const newsImages = images.map((item: any) => item.url);
+      return {
+        ...newProducts, // Convertir el documento de Mongoose a un objeto JavaScript simple
+        images: newsImages,
+      };
+    } catch (error) {
+      console.log(error);
+      this.handleDBEceptions(error);
+    }
+  }
 
   async update(id: string, updateProudctDto: UpdateProudctDto) {
-     const product= await this.findOne(id);
-     const transformProduc=await product.toJSON()
-      await product.updateOne({...transformProduc,...updateProudctDto,images:[]},{new:true});
-      await product.save()
-    return await this.findOne(id);
+    const { images, ...toUpdate } = updateProudctDto;
+    const product = await this.findOne(id);
+    if (!product)
+      throw new NotFoundException(`Product with id:${id} not found`);
+   
+   // const session = await this.ProductModel.db.startSession();
+   // session.startTransaction();
+    try {
+
+      let imagenesServer:  Array<any>=[]
+      if(images){
+        await this.productIamge.deleteMany({product:id})/*.session(session).exec()*/;
+        const imagesPromises = images.map((url) =>
+          this.productIamge.create({ url: url, product: product._id }),
+        );
+        imagenesServer = await Promise.all(imagesPromises);
+        product.images = imagenesServer.map((img) => img._id);
+        // product.images=images.map(
+          //   async(image)=> await this.productIamge.create([{ url: image, product: product._id }]/*,{ session }*/))
+        } 
+        //Object.assign(product, toUpdate);
+        console.log({...product,...toUpdate})
+        await this.ProductModel.updateOne({_id:id},{...product,...toUpdate});
+      return  await this.ProductModel.findById(id)
+    } catch (error) {
+    //  console.log(error)
+   //   await session.abortTransaction();
+     // session.endSession()
+      console.log(error)
+    }
+
   }
 
   async remove(id: string) {
@@ -89,8 +134,7 @@ export class ProductsService {
   }
 
   private handleDBEceptions(error: any) {
-
-    if (error.status <= 499 &&  error.status>=400)  {
+    if (error.status <= 499 && error.status >= 400) {
       throw new BadRequestException(error.response.message);
     }
     this.logger.error(error);
