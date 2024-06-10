@@ -5,6 +5,7 @@ import { EnvConfiguration } from './config/env.config';
 import { JoiValidationSchema } from './config/joi.validation';
 import { ProductsModule } from './products/products.module';
 import { CommonModule } from './common/common.module';
+import { SeedModule } from './seed/seed.module';
 
 
 
@@ -16,7 +17,8 @@ import { CommonModule } from './common/common.module';
     }),
     MongooseModule.forRoot(process.env.MONGO_DB),
     ProductsModule,
-    CommonModule
+    CommonModule,
+    SeedModule
   ],
 })
 export class AppModule {}

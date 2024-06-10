@@ -20,6 +20,8 @@ import { Product, ProductIamge, ProductSchema, producImageSchema } from './entit
         schema:producImageSchema
       }
     ])
-  ]
+  ],
+
+  exports:[ProductsService]
 })
 export class ProductsModule {}
