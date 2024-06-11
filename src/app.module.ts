@@ -7,6 +7,8 @@ import { ProductsModule } from './products/products.module';
 import { CommonModule } from './common/common.module';
 import { SeedModule } from './seed/seed.module';
 import { FilesModule } from './files/files.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 
 
@@ -16,6 +18,9 @@ import { FilesModule } from './files/files.module';
       load:[EnvConfiguration],
       validationSchema:JoiValidationSchema
     }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname,'..','public'),
+      }),
     MongooseModule.forRoot(process.env.MONGO_DB),
     ProductsModule,
     CommonModule,
