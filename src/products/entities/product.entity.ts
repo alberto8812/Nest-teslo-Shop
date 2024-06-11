@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
+import * as mongoose from 'mongoose';
 @Schema()
 export class Product extends Document {
   @Prop({
@@ -37,7 +38,8 @@ export class Product extends Document {
   @Prop()
   tags:string[]
   //imagens
-
+  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'ProductIamge' }] })
+  images:string[]
   
 }
 
