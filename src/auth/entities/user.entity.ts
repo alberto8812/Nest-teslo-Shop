@@ -5,7 +5,7 @@ import { Document } from 'mongoose';
 export class User extends Document {
     @Prop({unique:true})
     email:string;
-    @Prop({})
+    @Prop({select:false})// no envia este campo
     password:string;
     @Prop({})
     fullName:string;
