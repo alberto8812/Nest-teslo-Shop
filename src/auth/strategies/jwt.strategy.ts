@@ -6,7 +6,6 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { ConfigService } from '@nestjs/config';
 import { Injectable, UnauthorizedException } from "@nestjs/common";
-import { JwtService } from "@nestjs/jwt";
 
 
 @Injectable()
@@ -21,13 +20,13 @@ export class JwtStrategy  extends PassportStrategy(Strategy){
             jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),//POSICION QUE VAMOS A ENVIAR EL JSON WEB TOKEN
         })
     }
-    async Validate(payload:JwtPayload):Promise<User>{
-        const {email}=payload;
-        const user = await this.UserModel.findOne({email})
+    async validate(payload:JwtPayload):Promise<User>{// ojo espara que el metodo se llame validate error generado
+        const {email,id}=payload;
+        const user = await this.UserModel.findOne({_id:id});
         if(!user){
             throw new UnauthorizedException('Token not valid');
         }
-        if(user.isActive){
+        if(!user.isActive){
             throw new UnauthorizedException('Usuario no activo');
         }
         return user;// se envia en la request

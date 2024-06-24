@@ -25,7 +25,7 @@ export class AuthService {
      const {password:PassworrdResp,...userResponsed}=user.toJSON();
      return{
       ...userResponsed,
-      token:this.GetJwtToken({email:user.email})
+      token:this.GetJwtToken({id:user._id,email:user.email})
      };
     } catch (error) {
        this.handleDBEceptions(error)
@@ -37,7 +37,7 @@ export class AuthService {
 
     const {password,email}=loginUsreDto;
 
-    const user= await this.userModel.findOne({email}).select('email password').exec()
+    const user= await this.userModel.findOne({email}).select('email password id').exec()
 
     if(!user){
       throw  new UnauthorizedException('credential are not valid (email)');
@@ -46,15 +46,14 @@ export class AuthService {
       throw  new UnauthorizedException('credential are not valid (password)');
     }
     return{
-       ...user,
-       token:this.GetJwtToken({email:user.email})
+       ...user.toJSON(),
+       token:this.GetJwtToken({id:user._id,email:user.email})
       };
     //todo retornar jwt
   }
 
   
     private GetJwtToken(payload:JwtPayload){
-      console.log(payload)
       const token= this.jwtService.sign(payload);//codigo es sincrono
       return token; 
      }
