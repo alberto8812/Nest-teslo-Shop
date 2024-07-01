@@ -12,6 +12,7 @@ import { Product } from './entities/product.entity';
 import { Model, isValidObjectId } from 'mongoose';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { ProductIamge } from './entities/product-image.entity';
+import { User } from 'src/auth/entities/user.entity';
 
 @Injectable()
 export class ProductsService {
@@ -26,12 +27,13 @@ export class ProductsService {
     private readonly productIamge: Model<ProductIamge>,
   ) {}
 
-  async create(createProudctDto: CreateProudctDto) {
+  async create(createProudctDto: CreateProudctDto,user:User) {
     try {
       const { images = [], ...newcreateProudctDto } = createProudctDto;
 
       const product = await this.ProductModel.create({
         ...newcreateProudctDto,
+        user,
       });
       const imagesPromises = images.map((url) =>
         this.productIamge.create({ url: url, product: product._id }),
@@ -95,7 +97,7 @@ export class ProductsService {
     }
   }
 
-  async update(id: string, updateProudctDto: UpdateProudctDto) {
+  async update(id: string, updateProudctDto: UpdateProudctDto,user:User) {
     const { images, ...toUpdate } = updateProudctDto;
     const product = await this.findOne(id);
     if (!product)
@@ -120,7 +122,7 @@ export class ProductsService {
       //Object.assign(product, toUpdate);
       await this.ProductModel.updateOne(
         { _id: id },
-        { ...product, ...toUpdate },
+        { ...product, ...toUpdate,user, },
       );
       return await this.ProductModel.findById(id);
     } catch (error) {
